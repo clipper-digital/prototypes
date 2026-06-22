@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid meet">
+  <rect width="400" height="300" fill="#FFFFFF"/>
+  <rect x="0" y="0" width="400" height="64" fill="#9B2C14"/>
+  <text x="20" y="42" fill="white" font-family="Arial, sans-serif" font-size="26" font-weight="bold">TONY'S PIZZA</text>
+  <text x="20" y="60" fill="rgba(255,255,255,0.85)" font-family="Arial, sans-serif" font-size="11" font-style="italic">Authentic Italian · Clearwater, FL</text>
+  <text x="20" y="92" fill="#9B2C14" font-family="Arial, sans-serif" font-size="14" font-weight="bold">FAST · DELICIOUS · MADE TO ORDER</text>
+  <rect x="20" y="105" width="170" height="100" fill="#9B2C14" rx="6"/>
+  <text x="105" y="150" fill="white" font-family="Arial, sans-serif" font-size="34" font-weight="bold" text-anchor="middle">$5 OFF</text>
+  <text x="105" y="172" fill="white" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">$30 MINIMUM PURCHASE</text>
+  <text x="105" y="190" fill="rgba(255,255,255,0.75)" font-family="Arial, sans-serif" font-size="9" text-anchor="middle">Dine-in or carry-out</text>
+  <rect x="210" y="105" width="170" height="100" fill="#9B2C14" rx="6"/>
+  <text x="295" y="150" fill="white" font-family="Arial, sans-serif" font-size="34" font-weight="bold" text-anchor="middle">$10 OFF</text>
+  <text x="295" y="172" fill="white" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">$60 MINIMUM PURCHASE</text>
+  <text x="295" y="190" fill="rgba(255,255,255,0.75)" font-family="Arial, sans-serif" font-size="9" text-anchor="middle">Cannot combine offers</text>
+  <text x="20" y="230" fill="#1E293B" font-family="Arial, sans-serif" font-size="12" font-weight="bold">320 Main St · Clearwater, FL 33756</text>
+  <text x="20" y="246" fill="#475569" font-family="Arial, sans-serif" font-size="11">(727) 555-1234 · tonyspizza.com</text>
+  <text x="20" y="266" fill="#64748B" font-family="Arial, sans-serif" font-size="9">Mon-Thurs 11am-11pm · Fri-Sat 11am-1am · Sun 11am-11pm</text>
+  <text x="20" y="282" fill="#94A3B8" font-family="Arial, sans-serif" font-size="8">With coupon only. Not valid with other offers. Expires 30 days from issue.</text>
+</svg>

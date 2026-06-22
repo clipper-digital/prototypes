@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Valpak Clipp - BluePrint (Prototype)</title>
+<link href="//fonts.googleapis.com" rel="preconnect" crossorigin>
+<meta charset="utf-8">
+<meta name="robots" content="noindex,nofollow">
+<link href="favicon.svg" rel="icon" type="image/svg+xml">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons&family=Inter:wght@400;500;600;700" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/vuetify@2.7.2/dist/vuetify.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/intro.js@7.2.0/minified/introjs.min.css" rel="stylesheet">
+<link href="blueprint.css" rel="stylesheet">
+</head>
+
+<body>
+<div id="app">
+  <v-app v-cloak>
+    <v-toolbar flat class="bp-toolbar" height="64">
+      <a href="/blue-vue" class="bp-header-back-arrow" title="Back to Blue Vue">
+        <v-icon :color="iconText">arrow_back</v-icon>
+      </a>
+      <img src="valpak-clipp-logo.png" alt="Valpak Clipp" class="bp-header-logo">
+      <div class="bp-header-divider"></div>
+      <div class="bp-header-product">
+        <v-icon size="28" style="color:var(--bp-cyan)">view_quilt</v-icon>
+        <span class="bp-header-title">BluePrint</span>
+      </div>
+      <v-spacer></v-spacer>
+      <div class="bp-header-user d-none d-sm-block" v-if="authUser">
+        <v-icon small class="mr-1" :color="iconMuted">{{ greetingIcon }}</v-icon><span class="bp-header-greeting">{{ greeting }}</span>
+        <!--<span class="bp-header-admin-badge" v-if="authUser.admin">Admin</span>-->
+      </div>
+      <v-btn icon small class="ml-1" @click="toggleTheme" :title="$vuetify.theme.dark ? 'Switch to light mode' : 'Switch to dark mode'">
+        <v-icon small>{{ $vuetify.theme.dark ? 'light_mode' : 'dark_mode' }}</v-icon>
+      </v-btn>
+      <v-btn icon small class="ml-1" @click="tour" title="Feature tour" v-if="step === 'form'">
+        <v-icon small>help_outline</v-icon>
+      </v-btn>
+    </v-toolbar>
+
+    <v-main>
+      <div class="bp-bg-glow" aria-hidden="true"></div>
+      <div class="bp-layout">
+        <!-- Step indicator -->
+        <div class="bp-steps" v-if="step !== 'selected'">
+          <div class="bp-step" :class="{active: step === 'form', done: ['finding','generating','proofs'].includes(step)}">
+            <span class="bp-step-circle">
+              <v-icon v-if="['finding','generating','proofs'].includes(step)" size="17" color="white">check</v-icon>
+              <span v-else>1</span>
+            </span>
+            <span class="bp-step-label hidden-xs-only">Business Info</span>
+          </div>
+          <div class="bp-step-line" :class="{done: ['finding','generating','proofs'].includes(step)}"></div>
+          <div class="bp-step" :class="{active: ['finding','generating'].includes(step), done: step === 'proofs'}">
+            <span class="bp-step-circle">
+              <v-icon v-if="step === 'proofs'" size="17" color="white">check</v-icon>
+              <span v-else>2</span>
+            </span>
+            <span class="bp-step-label hidden-xs-only">Finding</span>
+          </div>
+          <div class="bp-step-line" :class="{done: step === 'proofs'}"></div>
+          <div class="bp-step" :class="{active: step === 'proofs'}">
+            <span class="bp-step-circle">3</span>
+            <span class="bp-step-label hidden-xs-only">Your Proofs</span>
+          </div>
+        </div>
+
+        <!-- STEP: form -->
+        <div v-if="step === 'form'" class="bp-content">
+          <div class="bp-page-header">
+            <h1 class="bp-step-title mt-3">Instant proofs. Built for print.</h1>
+            <p class="bp-step-sub mt-3 mb-0">BluePrint constructs customized print ad mockups on the fly, so business owners can see their future campaign before the meeting ends.</p>
+          </div>
+          <!-- Card 1: location + business search — always visible -->
+          <div id="bpLocationCard" class="bp-card bp-form-card pb-1">
+            <div class="bp-section-label">Your location</div>
+            <div class="d-flex align-center mb-1">
+              <v-autocomplete
+                v-model="userLocation"
+                :items="locationItems"
+                :search-input.sync="locationQuery"
+                no-filter
+                hide-no-data
+                clearable
+                outlined dense hide-details
+                :background-color="inputBg"
+                placeholder="New York, NY or 10001..."
+                prepend-inner-icon="place"
+                class="flex-grow-1 mr-2"
+                @change="geocodeLocation"
+                @blur="geocodeLocation"
+              ></v-autocomplete>
+              <v-btn
+                outlined
+                @click="useCurrentLocation"
+                :loading="geoLoading"
+                :disabled="geoLoading"
+                style="height:40px; min-width:40px"
+                title="Use current location"
+              >
+                <v-icon small>my_location</v-icon>
+                <span class="hidden-xs-only ml-1 capitalize">Use Current</span>
+              </v-btn>
+            </div>
+
+            <div id="bpBusinessSearch" class="mt-4">
+            <div class="bp-section-label">Find the client's business</div>
+            <v-autocomplete
+              v-model="selectedPlace"
+              :items="suggestions"
+              :loading="searching"
+              :search-input.sync="query"
+              item-text="text"
+              item-value="value"
+              no-filter
+              clearable
+              hide-no-data
+              return-object
+              outlined
+              dense
+              class="mb-1"
+              :background-color="inputBg"
+              :placeholder="locationSet ? 'Start typing a business name...' : 'Provide a location first...'"
+              prepend-inner-icon="search"
+              :disabled="!locationSet"
+            ></v-autocomplete>
+            </div>
+          </div>
+
+          <!-- Card 2: business details — visible once location and business are both set -->
+          <div v-if="detailsUnlocked" class="bp-card bp-form-card mt-4 bp-card-enter">
+
+            <div id="bpContactFields">
+            <div class="bp-section-label">Business Info</div>
+            <v-row dense>
+              <v-col cols="12" sm="6">
+                <v-text-field v-model="form.businessName" placeholder="Business Name" outlined dense :background-color="inputBg"></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="6">
+                <v-text-field v-model="form.phone" placeholder="Phone" outlined dense :background-color="inputBg"></v-text-field>
+              </v-col>
+            </v-row>
+            <v-text-field v-model="form.address" placeholder="Address" outlined dense :background-color="inputBg"></v-text-field>
+            <v-text-field v-model="form.website" placeholder="Website" outlined dense :background-color="inputBg"></v-text-field>
+            <v-textarea
+              v-model="form.hours"
+              placeholder="Hours of Operation"
+              outlined
+              dense
+              rows="3"
+              :background-color="inputBg"
+              class="mb-1"
+            ></v-textarea>
+            </div>
+
+            <div class="bp-section-label mt-2">Business Logo <span class="bp-optional">(optional)</span></div>
+            <div id="bpLogoUpload" class="bp-logo-upload">
+              <input type="file" ref="logoInput" accept="image/*" class="d-none" @change="handleLogo">
+              <div v-if="!logo" class="bp-logo-dropzone" @click="$refs.logoInput.click()">
+                <v-icon :color="iconFaint" class="mr-2">add_photo_alternate</v-icon>
+                <span>Click to upload a logo</span>
+              </div>
+              <div v-else class="bp-logo-preview">
+                <img :src="logo" class="bp-logo-thumb" alt="Logo preview" />
+                <span class="bp-logo-filename">{{ logoName }}</span>
+                <v-btn icon x-small @click.stop="clearLogo"><v-icon small>close</v-icon></v-btn>
+              </div>
+            </div>
+
+            <div id="bpOfferField">
+            <div class="bp-section-label mt-2">Offer Expiration Date</div>
+            <v-text-field
+              v-model="form.offer"
+              outlined
+              dense
+              :background-color="inputBg"
+              placeholder="mm/dd/yyyy"
+              :rules="offerRules"
+              validate-on-blur
+            ></v-text-field>
+            </div>
+
+            <v-btn id="bpGenerateBtn" block large class="bp-btn-gold mt-2" :disabled="!form.businessName || !offerValid" @click="submit">
+              Find My Templates <v-icon right>arrow_forward</v-icon>
+            </v-btn>
+          </div>
+        </div>
+
+        <!-- STEP: finding -->
+        <div v-else-if="step === 'finding'" class="bp-content bp-center-step">
+          <div class="bp-icon-circle bp-icon-circle--blue mb-4">
+            <v-icon size="38" color="#00B8D4">search</v-icon>
+          </div>
+          <h2 class="bp-step-title">Searching our template library...</h2>
+          <div class="bp-checklist bp-checklist--card mt-6">
+            <div v-for="(item, i) in findingItems" :key="i" class="bp-check-item">
+              <v-icon small :color="item.done ? '#10B981' : '#CBD5E1'" class="mr-2">
+                {{ item.done ? 'check_circle' : 'radio_button_unchecked' }}
+              </v-icon>
+              <span :class="item.done ? 'bp-check-done' : ''">{{ item.label }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP: generating -->
+        <div v-else-if="step === 'generating'" class="bp-content bp-center-step">
+          <div class="bp-icon-circle bp-icon-circle--cta mb-5">
+            <v-icon size="44" color="white" class="bp-sparkle">auto_awesome</v-icon>
+          </div>
+          <h2 class="bp-step-title">BluePrint is drafting your proofs...</h2>
+          <p class="bp-step-sub">Writing your headline and contact details for {{ form.businessName }}</p>
+          <div class="bp-proof-row mt-8">
+            <div class="bp-shimmer-card"></div>
+            <div class="bp-shimmer-card"></div>
+          </div>
+        </div>
+
+        <!-- STEP: proofs -->
+        <div v-else-if="step === 'proofs'" class="bp-content">
+          <div class="text-center mb-6">
+            <h2 class="bp-step-title mt-3">Your personalized proofs.</h2>
+            <p class="bp-step-sub mt-3">Pick the one that feels right — you can always come back and try again</p>
+          </div>
+          <div class="bp-proofs-wrapper">
+          <div class="bp-proof-row">
+            <!-- TODO: Proof generation currently uses Azure OpenAI and BI Ads until the Nuxeo APIs are available -->
+            <div v-for="(proof, i) in proofs" :key="i" class="bp-proof-card" @click="openDialog(proof)">
+              <div class="bp-design-ref">
+                <img :src="proof.templateUrl" alt="Design reference" class="bp-template-thumb" @error="$event.target.style.display='none'" />
+                <div class="bp-design-label">Design Inspiration</div>
+              </div>
+              <div class="bp-divider">
+                <v-icon small color="#00B8D4">auto_awesome</v-icon>
+                <span class="ml-1">Your Customized Proof</span>
+              </div>
+              <div v-if="logo" class="bp-proof-logo-row">
+                <img :src="logo" class="bp-proof-logo" alt="Business logo" />
+              </div>
+              <div class="bp-proof-html-wrap">
+                <div v-html="proof.html" class="bp-proof-html"></div>
+              </div>
+              <div class="pa-3">
+                <div class="bp-proof-headline mb-1" v-html="proof.headline"></div>
+                <div class="bp-proof-offer" v-html="proof.offerText"></div>
+              </div>
+              <div class="px-3 pb-3 bp-proof-action" @click.stop>
+                <v-btn block class="bp-btn-coral" @click="pickProof(proof)">
+                  Pick This Proof <v-icon right>check</v-icon>
+                </v-btn>
+              </div>
+            </div>
+          </div>
+          </div><!-- end bp-proofs-wrapper -->
+          <div class="text-center mt-4">
+            <a href="#" @click.prevent="step = 'form'" class="bp-link"><v-icon small class="mr-1">arrow_back</v-icon>Adjust info and try again</a>
+          </div>
+        </div>
+
+        <!-- STEP: selected -->
+        <div v-else-if="step === 'selected'" class="bp-content bp-selected-step">
+          <div class="bp-confetti-container" aria-hidden="true">
+            <div v-for="(p, i) in confetti" :key="i" class="bp-confetti-piece"
+                :style="{left: p.left + '%', background: p.color, width: p.size + 'px', height: p.size + 'px',
+                          borderRadius: p.round ? '50%' : '2px', animationDelay: p.delay + 's',
+                          animationDuration: p.dur + 's'}">
+            </div>
+          </div>
+          <div class="bp-selected-inner">
+            <div class="bp-icon-circle bp-icon-circle--green mb-2">
+              <v-icon size="44" color="#10B981">celebration</v-icon>
+            </div>
+            <h2 class="bp-step-title mt-3">Great pick!</h2>
+            <p class="bp-step-sub mt-3">Ready to share with <strong>{{ form.businessName }}</strong>?</p>
+            <div class="bp-selected-card">
+              <div v-if="selected.templateUrl" class="bp-design-ref">
+                <img :src="selected.templateUrl" alt="Design reference" class="bp-template-thumb" @error="$event.target.style.display='none'" />
+                <div class="bp-design-label">Design Inspiration</div>
+              </div>
+              <div class="bp-divider">
+                <v-icon small color="#00B8D4">auto_awesome</v-icon>
+                <span class="ml-1">Your Customized Proof</span>
+              </div>
+              <div v-if="logo" class="bp-proof-logo-row">
+                <img :src="logo" class="bp-proof-logo" alt="Business logo" />
+              </div>
+              <div class="bp-proof-html-wrap bp-selected-proof">
+                <div v-html="selected.html" class="bp-proof-html"></div>
+              </div>
+            </div>
+            <div class="bp-share-row mt-6">
+              <a href="#" class="bp-share-btn-primary" @click.prevent="openEmailDialog">
+                <v-icon small class="mr-1" color="white">mail</v-icon> Email to Client
+              </a>
+              <v-btn outlined class="bp-share-btn-outline ml-2"
+                     @click="copyLink"
+                     :loading="copyLinkPending"
+                     :disabled="copyLinkPending">
+                <v-icon small class="mr-1">content_copy</v-icon> {{ copyLinkLabel }}
+              </v-btn>
+              <v-btn outlined class="bp-share-btn-outline ml-2" @click="openPrintDialog">
+                <v-icon small class="mr-1">print</v-icon> Print
+              </v-btn>
+            </div>
+            <div class="mt-6 mb-10">
+              <a href="#" @click.prevent="reset" class="bp-link"><v-icon small class="mr-1">refresh</v-icon>Start over with a different business</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Print-only template (mirrors email layout) -->
+      <div class="bp-print-template" v-if="selected">
+        <div class="bp-print-card">
+        <div class="bp-print-header">
+          <span class="bp-print-brand">Valpak Clipp</span>
+          <span class="bp-print-sub">Ad Proof</span>
+        </div>
+        <div class="bp-print-body">
+          <div class="bp-print-biz-row">
+            <img v-if="logo" :src="logo" class="bp-print-logo" alt="Business logo" />
+            <h2 class="bp-print-biz">{{ form.businessName }}</h2>
+          </div>
+          <p class="bp-print-intro">Here's a personalized Valpak Clipp ad proof I put together for you.</p>
+          <div v-if="selected.templateUrl" class="bp-print-inspiration">
+            <img :src="selected.templateUrl" alt="Design Inspiration" class="bp-print-thumb" @error="$event.target.style.display='none'" />
+            <p class="bp-print-design-label">Design Inspiration</p>
+          </div>
+          <div class="bp-print-divider-bar">✨ Your Customized Proof</div>
+          <h3 class="bp-print-headline" v-html="selected.headline"></h3>
+          <div class="bp-print-offer-box">
+            <p v-html="selected.offerText"></p>
+          </div>
+          <p v-if="selected.finePrint" class="bp-print-fine" v-html="selected.finePrint"></p>
+          <div v-if="form.address || form.phone || form.website" class="bp-print-contact">
+            <p v-if="form.address">📍 {{ form.address }}</p>
+            <p v-if="form.phone">📞 {{ form.phone }}</p>
+            <p v-if="form.website">🌐 {{ form.website }}</p>
+          </div>
+          <div class="bp-print-signoff">
+            <p>Ready to get started? Give me a call or reach out by email.</p>
+            <p v-if="repEmailEdit || (authUser && authUser.emailAddr)" class="bp-print-email">{{ repEmailEdit || authUser.emailAddr }}</p>
+            <p class="bp-print-warm">{{ warmCopyEdit || 'I created this with your business in mind — and I think it could be a great fit. I\'d love to walk you through it, answer any questions, and help get your first mailing on the calendar. No pressure at all.' }}</p>
+            <p v-if="repNameEdit || repName" class="bp-print-rep">{{ repNameEdit || repName }}</p>
+            <p class="bp-print-rep-title">Your Valpak Clipp Representative</p>
+          </div>
+        </div>
+        <div class="bp-print-footer">Powered by Valpak Clipp &copy; {{ new Date().getFullYear() }}</div>
+        </div><!-- end bp-print-card -->
+      </div>
+    </v-main>
+
+    <v-footer app dark color="#0047AB" class="caption d-flex justify-space-between py-3">
+      <div>
+        Rep ToolPak <span class="mx-1">&copy;{{ new Date().getFullYear() }} Valpak Clipp</span>
+        <a class="white--text" href="/blue-vue/terms" target="_blank">Terms of Use</a>
+      </div>
+      <div class="text-right">
+        <span class="white--text">Advertise with</span>
+        <a href="https://www.valpak.com/advertise" class="white--text" target="_blank">Valpak</a> and
+        <a href="https://advertise.clipp.com" class="white--text" target="_blank">Clipp</a>
+      </div>
+    </v-footer>
+
+    <!-- Proof preview dialog -->
+    <v-dialog v-model="dialogOpen" fullscreen scrollable transition="dialog-bottom-transition">
+      <v-card v-if="dialogProof" class="bp-dialog-card">
+        <v-toolbar flat class="bp-toolbar" height="64">
+          <a class="bp-header-back-arrow mr-2" href="#" @click.prevent="dialogOpen = false" title="Close preview">
+            <v-icon :color="iconText">arrow_back</v-icon>
+          </a>
+          <span class="bp-header-title ml-1">Proof Preview</span>
+          <v-spacer></v-spacer>
+          <v-btn class="bp-btn-coral mr-2" @click="pickProof(dialogProof)">
+            Pick This Proof <v-icon right>check</v-icon>
+          </v-btn>
+        </v-toolbar>
+        <v-card-text class="bp-dialog-body">
+          <div class="bp-dialog-inner">
+            <div class="bp-dialog-content-card">
+              <div v-if="dialogProof.templateUrl" class="bp-dialog-inspiration">
+                <img :src="dialogProof.templateUrl" alt="Design reference" class="bp-dialog-thumb" @error="$event.target.style.display='none'" />
+                <div class="bp-design-label mt-n10 mb-12">Design Inspiration</div>
+              </div>
+              <div class="bp-divider">
+                <v-icon small color="#00B8D4">auto_awesome</v-icon>
+                <span class="ml-1">Your Customized Proof</span>
+              </div>
+              <div v-if="logo" class="bp-proof-logo-row">
+                <img :src="logo" class="bp-proof-logo" alt="Business logo" />
+              </div>
+              <div class="bp-dialog-proof-wrap">
+                <div v-html="dialogProof.html" class="bp-dialog-proof"></div>
+              </div>
+              <div class="bp-proof-headline mt-3" v-html="dialogProof.headline"></div>
+              <div class="bp-proof-offer mt-1" v-html="dialogProof.offerText"></div>
+              <div class="bp-proof-offer mt-1" v-html="dialogProof.finePrint"></div>
+            </div>
+          </div>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
+
+    <!-- Send email dialog -->
+    <v-dialog v-model="emailDialog" max-width="520">
+      <v-card class="pa-2">
+        <v-card-title class="bp-step-title pt-4">Email to Client</v-card-title>
+        <v-card-text>
+          <p class="bp-step-sub mb-4">Enter your client's email address and we'll send them a nicely formatted ad proof.</p>
+          <v-text-field
+            v-model="clientEmail"
+            label="Client's Email Address"
+            outlined dense type="email" autofocus
+            @keydown.enter="sendEmail"
+          ></v-text-field>
+          <div class="bp-sig-section"><span class="bp-sig-label">Your Signature</span></div>
+          <v-row dense>
+            <v-col cols="12" sm="6">
+              <v-text-field v-model="repNameEdit" label="Your Name" outlined dense></v-text-field>
+            </v-col>
+            <v-col cols="12" sm="6">
+              <v-text-field v-model="repEmailEdit" label="Your Email" outlined dense type="email"></v-text-field>
+            </v-col>
+          </v-row>
+          <v-textarea v-model="warmCopyEdit" label="Personal Message" outlined dense auto-grow rows="3"></v-textarea>
+          <a href="#" class="bp-save-defaults" @click.prevent="saveRepProfile">
+            <v-icon x-small class="mr-1">save</v-icon>Save as my defaults
+          </a>
+        </v-card-text>
+        <v-card-actions class="pb-4 px-4">
+          <v-spacer></v-spacer>
+          <v-btn text @click="emailDialog = false">Cancel</v-btn>
+          <v-btn class="bp-btn-coral ml-2" @click="sendEmail"
+            :loading="emailSending"
+            :disabled="!clientEmail || emailSending">
+            Send <v-icon right>send</v-icon>
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <!-- Pre-print dialog -->
+    <v-dialog v-model="printDialog" max-width="520">
+      <v-card class="pa-2">
+        <v-card-title class="bp-step-title pt-4">Print Proof</v-card-title>
+        <v-card-text>
+          <p class="bp-step-sub mb-2">Customize your signature before printing.</p>
+          <div class="bp-sig-section"><span class="bp-sig-label">Your Signature</span></div>
+          <v-row dense>
+            <v-col cols="12" sm="6">
+              <v-text-field v-model="repNameEdit" label="Your Name" outlined dense></v-text-field>
+            </v-col>
+            <v-col cols="12" sm="6">
+              <v-text-field v-model="repEmailEdit" label="Your Email" outlined dense type="email"></v-text-field>
+            </v-col>
+          </v-row>
+          <v-textarea v-model="warmCopyEdit" label="Personal Message" outlined dense auto-grow rows="3"></v-textarea>
+          <a href="#" class="bp-save-defaults" @click.prevent="saveRepProfile">
+            <v-icon x-small class="mr-1">save</v-icon>Save as my defaults
+          </a>
+        </v-card-text>
+        <v-card-actions class="pb-4 px-4">
+          <v-spacer></v-spacer>
+          <v-btn text @click="printDialog = false">Cancel</v-btn>
+          <v-btn class="bp-btn-coral ml-2" @click="confirmPrint">
+            Print <v-icon right>print</v-icon>
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-snackbar top v-model="geoFail" color="orange darken-3" :timeout="5000">
+      <v-icon small class="mr-2">location_off</v-icon> Location access unavailable — please enter your location manually.
+    </v-snackbar>
+    <v-snackbar bottom v-model="snackbar" color="blue-grey darken-4" :timeout="3000">
+      Copied to clipboard!
+    </v-snackbar>
+    <v-snackbar top v-model="emailSent" color="green darken-1" :timeout="4000">
+      <v-icon small class="mr-2">mail</v-icon> Email sent!
+    </v-snackbar>
+    <v-snackbar top v-model="genError" color="red darken-1" :timeout="5000">
+      Couldn't generate proofs — please try again.
+    </v-snackbar>
+    <v-snackbar bottom v-model="profileSaved" color="green darken-1" :timeout="3000">
+      <v-icon small class="mr-2">check_circle</v-icon> Saved as your defaults!
+    </v-snackbar>
+    <v-snackbar bottom v-model="linkCopied" color="green darken-1" :timeout="8000">
+      <v-icon small class="mr-2">link</v-icon> Link copied — valid for 30 days
+    </v-snackbar>
+  </v-app>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2.7.16/dist/vue.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vuetify@2.7.2/dist/vuetify.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios@1.6.7/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/intro.js@7.2.0/intro.min.js"></script>
+<script>var authUser = { fullName: 'Demo Rep', emailAddr: 'demo@valpak.com' };</script>
+<script src="mocks.js"></script>
+<script src="blueprint.js"></script>
+</body>
+</html>
