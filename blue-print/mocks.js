@@ -123,7 +123,7 @@
     if (url.includes('/blue-vue/api/ads')) {
       return delay(400, () => ({
         data: [
-          { material: 'CP44', link: 'https://www.insidevalpak.com/MyAdCenterContent/AdOrderPreview/3261118012_side1.jpg' },
+          { material: 'CP44', link: 'https://www.insidevalpak.com/MyAdCenterContent/AdOrderPreview/3261121351_side1.jpg' },
           { material: 'CP44', link: 'https://www.insidevalpak.com/MyAdCenterContent/AdOrderPreview/3261114612_side1.jpg' }
         ]
       }))
@@ -134,7 +134,7 @@
   axios.post = function (url, body, ...rest) {
     if (url.includes('/blue-print/api/generate')) {
       const templateUrls = (body && body.templateUrls) || [
-        'https://www.insidevalpak.com/MyAdCenterContent/AdOrderPreview/3261118012_side1.jpg',
+        'https://www.insidevalpak.com/MyAdCenterContent/AdOrderPreview/3261121351_side1.jpg',
         'https://www.insidevalpak.com/MyAdCenterContent/AdOrderPreview/3261114612_side1.jpg'
       ]
       return delay(2200, () => ({

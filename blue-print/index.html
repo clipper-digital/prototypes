@@ -21,7 +21,7 @@
       <a href="/blue-vue" class="bp-header-back-arrow" title="Back to Blue Vue">
         <v-icon :color="iconText">arrow_back</v-icon>
       </a>
-      <img src="valpak-clipp-logo.png" alt="Valpak Clipp" class="bp-header-logo">
+      <img :src="logoSrc" alt="Valpak Clipp" class="bp-header-logo">
       <div class="bp-header-divider"></div>
       <div class="bp-header-product">
         <v-icon size="28" style="color:var(--bp-cyan)">view_quilt</v-icon>
@@ -225,14 +225,10 @@
           </div>
           <div class="bp-proofs-wrapper">
           <div class="bp-proof-row">
-            <!-- TODO: Proof generation currently uses Azure OpenAI and BI Ads until the Nuxeo APIs are available -->
             <div v-for="(proof, i) in proofs" :key="i" class="bp-proof-card" @click="openDialog(proof)">
               <div class="bp-divider">
                 <v-icon small color="#00B8D4">auto_awesome</v-icon>
                 <span class="ml-1">Your Customized Proof</span>
-              </div>
-              <div v-if="logo" class="bp-proof-logo-row">
-                <img :src="logo" class="bp-proof-logo" alt="Business logo" />
               </div>
               <div class="bp-proof-html-wrap">
                 <div v-html="proof.html" class="bp-proof-html"></div>
@@ -269,9 +265,6 @@
               <div class="bp-divider">
                 <v-icon small color="#00B8D4">auto_awesome</v-icon>
                 <span class="ml-1">Your Customized Proof</span>
-              </div>
-              <div v-if="logo" class="bp-proof-logo-row">
-                <img :src="logo" class="bp-proof-logo" alt="Business logo" />
               </div>
               <div class="bp-proof-html-wrap bp-selected-proof">
                 <div v-html="selected.html" class="bp-proof-html"></div>
@@ -362,9 +355,6 @@
               <div class="bp-divider">
                 <v-icon small color="#00B8D4">auto_awesome</v-icon>
                 <span class="ml-1">Your Customized Proof</span>
-              </div>
-              <div v-if="logo" class="bp-proof-logo-row">
-                <img :src="logo" class="bp-proof-logo" alt="Business logo" />
               </div>
               <div class="bp-dialog-proof-wrap">
                 <div v-html="dialogProof.html" class="bp-dialog-proof"></div>

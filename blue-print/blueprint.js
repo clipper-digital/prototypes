@@ -57,6 +57,7 @@ var vm = new Vue({
   },
   computed: {
     inputBg() { return this.$vuetify.theme.dark ? '#1B2E4D' : 'white' },
+    logoSrc() { return this.$vuetify.theme.dark ? 'valpak-clipp-logo-white.png' : 'valpak-clipp-logo.png' },
     iconText() { return this.$vuetify.theme.dark ? '#CBD5E1' : '#475569' },
     iconMuted() { return this.$vuetify.theme.dark ? '#94A3B8' : '#64748B' },
     iconFaint() { return this.$vuetify.theme.dark ? '#64748B' : '#94A3B8' },

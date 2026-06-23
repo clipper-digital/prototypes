@@ -145,6 +145,9 @@ html {
   line-height: 1;
   margin-top: 3px;
 }
+.theme--dark.v-application .bp-header-title {
+  color: var(--bp-cyan);
+}
 
 .bp-header-user {
   display: flex;
@@ -609,12 +612,11 @@ html {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8px 12px;
-  background: #E0F7FA;
-  font-size: 0.75rem;
+  padding: 24px 12px 0;
+  font-size: 1rem;
   color: #006064;
   font-weight: 600;
-  border-bottom: 1px solid #FDE68A;
+  margin-bottom: -24px;
 }
 
 .bp-proof-html-wrap {
@@ -706,10 +708,6 @@ html {
   overflow-x: auto;
   display: flex;
   justify-content: center;
-}
-
-.bp-dialog-proof {
-  max-width: 560px;
 }
 
 .bp-dialog-proof > div {
