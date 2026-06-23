@@ -809,6 +809,16 @@ html {
   color: var(--bp-cyan) !important;
 }
 
+/* Dark mode: Use Current button matches input border (muted), hover lifts to white */
+.theme--dark.v-application .bp-use-current-btn.v-btn--outlined {
+  border-color: var(--bp-border) !important;
+  color: var(--bp-muted) !important;
+}
+.theme--dark.v-application .bp-use-current-btn.v-btn--outlined:hover {
+  border-color: white !important;
+  color: white !important;
+}
+
 .bp-link {
   color: var(--bp-cyan);
   font-size: 0.88rem;
