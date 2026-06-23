@@ -295,7 +295,6 @@ html {
 .bp-step.active .bp-step-label { color: var(--bp-deep); font-weight: 700; }
 .bp-step.done .bp-step-label  { color: var(--bp-text-soft); }
 .theme--dark.v-application .bp-step.active .bp-step-label { color: var(--bp-cyan); }
-.theme--dark.v-application .bp-step-line,
 .theme--dark.v-application .bp-step-line.done { background: var(--bp-cyan); }
 
 /* Soften the bright-white footer text/links sitting on the blueprint-blue bar */
@@ -804,11 +803,7 @@ html {
   color: var(--bp-deep) !important;
 }
 
-/* Dark mode: outline buttons + share-outline use cyan border + text */
-.theme--dark.v-application .v-btn--outlined {
-  color: var(--bp-cyan) !important;
-  border-color: var(--bp-cyan) !important;
-}
+/* Dark mode: share-outline buttons get cyan border + text (Copy Link, Print) */
 .theme--dark.v-application .bp-share-btn-outline {
   border-color: var(--bp-cyan) !important;
   color: var(--bp-cyan) !important;
