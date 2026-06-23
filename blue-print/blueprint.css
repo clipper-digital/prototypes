@@ -295,6 +295,8 @@ html {
 .bp-step.active .bp-step-label { color: var(--bp-deep); font-weight: 700; }
 .bp-step.done .bp-step-label  { color: var(--bp-text-soft); }
 .theme--dark.v-application .bp-step.active .bp-step-label { color: var(--bp-cyan); }
+.theme--dark.v-application .bp-step-line,
+.theme--dark.v-application .bp-step-line.done { background: var(--bp-cyan); }
 
 /* Soften the bright-white footer text/links sitting on the blueprint-blue bar */
 .bp-footer.v-footer { color: rgba(255,255,255,0.72) !important; }
@@ -466,6 +468,7 @@ html {
   color: var(--bp-deep);
   margin: 0;
 }
+.theme--dark.v-application .bp-step-title { color: var(--bp-cyan); }
 
 /* Keep dialog card titles at a sensible size */
 .v-dialog .bp-step-title {
@@ -778,13 +781,15 @@ html {
 .bp-share-btn-primary {
   display: inline-flex;
   align-items: center;
-  background: var(--grad-cta);
+  background: linear-gradient(90deg, var(--bp-action), var(--bp-action-2));
   color: white !important;
   padding: 10px 20px;
   border-radius: 8px;
   font-size: 0.9rem;
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: 0.03em;
   text-decoration: none;
+  text-transform: none;
   transition: opacity 0.15s;
   box-shadow: 0 8px 20px -8px rgba(234,88,12,0.5);
 }
@@ -797,6 +802,16 @@ html {
   font-weight: 600 !important;
   border-color: var(--bp-deep) !important;
   color: var(--bp-deep) !important;
+}
+
+/* Dark mode: outline buttons + share-outline use cyan border + text */
+.theme--dark.v-application .v-btn--outlined {
+  color: var(--bp-cyan) !important;
+  border-color: var(--bp-cyan) !important;
+}
+.theme--dark.v-application .bp-share-btn-outline {
+  border-color: var(--bp-cyan) !important;
+  color: var(--bp-cyan) !important;
 }
 
 .bp-link {
