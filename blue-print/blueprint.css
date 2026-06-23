@@ -294,6 +294,13 @@ html {
 
 .bp-step.active .bp-step-label { color: var(--bp-deep); font-weight: 700; }
 .bp-step.done .bp-step-label  { color: var(--bp-text-soft); }
+.theme--dark.v-application .bp-step.active .bp-step-label { color: var(--bp-cyan); }
+
+/* Soften the bright-white footer text/links sitting on the blueprint-blue bar */
+.bp-footer.v-footer { color: rgba(255,255,255,0.72) !important; }
+.bp-footer .white--text { color: rgba(255,255,255,0.72) !important; }
+.bp-footer a.white--text { text-decoration: none; transition: color 0.15s; }
+.bp-footer a.white--text:hover { color: rgba(255,255,255,0.95) !important; }
 
 .bp-step-line {
   width: clamp(24px, 5vw, 52px);
