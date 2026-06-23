@@ -18,7 +18,7 @@
 <div id="app">
   <v-app v-cloak>
     <v-toolbar flat class="bp-toolbar" height="64">
-      <a href="/blue-vue" class="bp-header-back-arrow" title="Back to Blue Vue">
+      <a href="#" @click.prevent class="bp-header-back-arrow" title="Back to Blue Vue">
         <v-icon :color="iconText">arrow_back</v-icon>
       </a>
       <img :src="logoSrc" alt="Valpak Clipp" class="bp-header-logo">
@@ -328,12 +328,12 @@
     <v-footer dark color="#0047AB" class="bp-footer caption d-flex justify-space-between py-3">
       <div>
         Rep ToolPak <span class="mx-1">&copy;{{ new Date().getFullYear() }} Valpak Clipp</span>
-        <a class="white--text" href="/blue-vue/terms" target="_blank">Terms of Use</a>
+        <a class="white--text" href="#" @click.prevent>Terms of Use</a>
       </div>
       <div class="text-right">
         <span class="white--text">Advertise with</span>
-        <a href="https://www.valpak.com/advertise" class="white--text" target="_blank">Valpak</a> and
-        <a href="https://advertise.clipp.com" class="white--text" target="_blank">Clipp</a>
+        <a href="#" @click.prevent class="white--text">Valpak</a> and
+        <a href="#" @click.prevent class="white--text">Clipp</a>
       </div>
     </v-footer>
 
