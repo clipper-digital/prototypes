@@ -227,10 +227,6 @@
           <div class="bp-proof-row">
             <!-- TODO: Proof generation currently uses Azure OpenAI and BI Ads until the Nuxeo APIs are available -->
             <div v-for="(proof, i) in proofs" :key="i" class="bp-proof-card" @click="openDialog(proof)">
-              <div class="bp-design-ref">
-                <img :src="proof.templateUrl" alt="Design reference" class="bp-template-thumb" @error="$event.target.style.display='none'" />
-                <div class="bp-design-label">Design Inspiration</div>
-              </div>
               <div class="bp-divider">
                 <v-icon small color="#00B8D4">auto_awesome</v-icon>
                 <span class="ml-1">Your Customized Proof</span>
@@ -240,10 +236,6 @@
               </div>
               <div class="bp-proof-html-wrap">
                 <div v-html="proof.html" class="bp-proof-html"></div>
-              </div>
-              <div class="pa-3">
-                <div class="bp-proof-headline mb-1" v-html="proof.headline"></div>
-                <div class="bp-proof-offer" v-html="proof.offerText"></div>
               </div>
               <div class="px-3 pb-3 bp-proof-action" @click.stop>
                 <v-btn block class="bp-btn-coral" @click="pickProof(proof)">
@@ -274,10 +266,6 @@
             <h2 class="bp-step-title mt-3">Great pick!</h2>
             <p class="bp-step-sub mt-3">Ready to share with <strong>{{ form.businessName }}</strong>?</p>
             <div class="bp-selected-card">
-              <div v-if="selected.templateUrl" class="bp-design-ref">
-                <img :src="selected.templateUrl" alt="Design reference" class="bp-template-thumb" @error="$event.target.style.display='none'" />
-                <div class="bp-design-label">Design Inspiration</div>
-              </div>
               <div class="bp-divider">
                 <v-icon small color="#00B8D4">auto_awesome</v-icon>
                 <span class="ml-1">Your Customized Proof</span>
@@ -323,16 +311,8 @@
             <h2 class="bp-print-biz">{{ form.businessName }}</h2>
           </div>
           <p class="bp-print-intro">Here's a personalized Valpak Clipp ad proof I put together for you.</p>
-          <div v-if="selected.templateUrl" class="bp-print-inspiration">
-            <img :src="selected.templateUrl" alt="Design Inspiration" class="bp-print-thumb" @error="$event.target.style.display='none'" />
-            <p class="bp-print-design-label">Design Inspiration</p>
-          </div>
           <div class="bp-print-divider-bar">✨ Your Customized Proof</div>
-          <h3 class="bp-print-headline" v-html="selected.headline"></h3>
-          <div class="bp-print-offer-box">
-            <p v-html="selected.offerText"></p>
-          </div>
-          <p v-if="selected.finePrint" class="bp-print-fine" v-html="selected.finePrint"></p>
+          <div class="bp-print-proof" v-html="selected.html"></div>
           <div v-if="form.address || form.phone || form.website" class="bp-print-contact">
             <p v-if="form.address">📍 {{ form.address }}</p>
             <p v-if="form.phone">📞 {{ form.phone }}</p>
@@ -379,10 +359,6 @@
         <v-card-text class="bp-dialog-body">
           <div class="bp-dialog-inner">
             <div class="bp-dialog-content-card">
-              <div v-if="dialogProof.templateUrl" class="bp-dialog-inspiration">
-                <img :src="dialogProof.templateUrl" alt="Design reference" class="bp-dialog-thumb" @error="$event.target.style.display='none'" />
-                <div class="bp-design-label mt-n10 mb-12">Design Inspiration</div>
-              </div>
               <div class="bp-divider">
                 <v-icon small color="#00B8D4">auto_awesome</v-icon>
                 <span class="ml-1">Your Customized Proof</span>
@@ -393,9 +369,6 @@
               <div class="bp-dialog-proof-wrap">
                 <div v-html="dialogProof.html" class="bp-dialog-proof"></div>
               </div>
-              <div class="bp-proof-headline mt-3" v-html="dialogProof.headline"></div>
-              <div class="bp-proof-offer mt-1" v-html="dialogProof.offerText"></div>
-              <div class="bp-proof-offer mt-1" v-html="dialogProof.finePrint"></div>
             </div>
           </div>
         </v-card-text>
