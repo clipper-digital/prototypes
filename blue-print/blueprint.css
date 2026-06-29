@@ -633,6 +633,12 @@ html {
   overflow: hidden;
 }
 
+/* Trim print marks / bleed on every card thumbnail (side 1 HTML render + side 2 direct img). */
+.bp-proof-html-wrap img {
+  clip-path: inset(7% 6% 7% 6%);
+  -webkit-clip-path: inset(7% 6% 7% 6%);
+}
+
 .bp-proof-html {
   width: 100%;
   pointer-events: none;
