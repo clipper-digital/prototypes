@@ -33,10 +33,10 @@
         <!--<span class="bp-header-admin-badge" v-if="authUser.admin">Admin</span>-->
       </div>
       <v-btn icon small class="ml-1" @click="toggleTheme" :title="$vuetify.theme.dark ? 'Switch to light mode' : 'Switch to dark mode'">
-        <v-icon small>{{ $vuetify.theme.dark ? 'light_mode' : 'dark_mode' }}</v-icon>
+        <v-icon small>contrast</v-icon>
       </v-btn>
-      <v-btn icon small class="ml-1" @click="tour" title="Feature tour" v-if="step === 'form'">
-        <v-icon small>help_outline</v-icon>
+      <v-btn icon small class="ml-1" @click="tour" title="Feature tour" v-if="['form','proofs','selected'].includes(step)">
+        <v-icon small :color="iconFaint">help_outline</v-icon>
       </v-btn>
     </v-toolbar>
 
@@ -170,20 +170,26 @@
               </div>
             </div>
 
-            <div id="bpOfferField">
-            <div class="bp-section-label mt-2">Offer Expiration Date</div>
-            <v-text-field
-              v-model="form.offer"
-              outlined
-              dense
-              :background-color="inputBg"
-              placeholder="mm/dd/yyyy"
-              :rules="offerRules"
-              validate-on-blur
-            ></v-text-field>
+            <div id="bpAdTypes">
+            <div class="bp-section-label mt-6">Ad Types</div>
+            <div class="bp-ad-types-row">
+              <div class="bp-pill-group" role="radiogroup" aria-label="Product line">
+                <button type="button"
+                        class="bp-pill"
+                        :class="{ 'bp-pill--active': form.productLine === 'VALPAK' }"
+                        :aria-pressed="form.productLine === 'VALPAK'"
+                        @click="form.productLine = 'VALPAK'">Valpak</button>
+                <button type="button"
+                        class="bp-pill"
+                        :class="{ 'bp-pill--active': form.productLine === 'CLIPP' }"
+                        :aria-pressed="form.productLine === 'CLIPP'"
+                        @click="form.productLine = 'CLIPP'">Clipp</button>
+              </div>
+              <v-checkbox v-model="form.cco" label="CCO" hide-details dense class="bp-cco-checkbox ma-0 pa-0"></v-checkbox>
+            </div>
             </div>
 
-            <v-btn id="bpGenerateBtn" block large class="bp-btn-gold mt-2" :disabled="!form.businessName || !offerValid" @click="submit">
+            <v-btn id="bpGenerateBtn" block large class="bp-btn-gold mt-10" :disabled="!form.businessName" @click="submit">
               Find My Templates <v-icon right>arrow_forward</v-icon>
             </v-btn>
           </div>
@@ -224,15 +230,27 @@
             <h2 class="bp-step-title mt-3">Your personalized proofs.</h2>
             <p class="bp-step-sub mt-3">Pick the one that feels right — you can always come back and try again</p>
           </div>
+          <div class="bp-proof-business-row" v-if="form.businessName">
+            <img v-if="logo" :src="logo" class="bp-proof-business-logo" alt="Business logo" />
+            <span class="bp-proof-business-name">{{ form.businessName }}</span>
+          </div>
           <div class="bp-proofs-wrapper">
           <div class="bp-proof-row">
             <div v-for="(proof, i) in proofs" :key="i" class="bp-proof-card" @click="openDialog(proof)">
-              <div class="bp-divider">
-                <v-icon small color="#00B8D4">auto_awesome</v-icon>
-                <span class="ml-1">Your Customized Proof</span>
+              <div class="bp-proof-title">{{ proof.title }}</div>
+              <div class="bp-proof-actions-bar" @click.stop>
+                <a href="#" class="bp-proof-action-link" @click.prevent="openDialog(proof)">
+                  <v-icon small class="mr-1">zoom_in</v-icon>Enlarge
+                </a>
+                <a v-if="proof.side2Url" href="#" class="bp-proof-action-link" @click.prevent="flipProofSide(proof)">
+                  <v-icon small class="mr-1">flip</v-icon>Flip
+                </a>
               </div>
               <div class="bp-proof-html-wrap">
-                <div v-html="proof.html" class="bp-proof-html"></div>
+                <img v-if="(proof.activeSideIndex || 0) === 1 && proof.side2Url"
+                     :src="proof.side2Url" :alt="proof.title || 'Ad back side'"
+                     style="width:100%;display:block;" />
+                <div v-else v-html="proof.html" class="bp-proof-html"></div>
               </div>
               <div class="px-3 pb-3 bp-proof-action" @click.stop>
                 <v-btn block class="bp-btn-coral" @click="pickProof(proof)">
@@ -344,7 +362,13 @@
           <a class="bp-header-back-arrow mr-2" href="#" @click.prevent="dialogOpen = false" title="Close preview">
             <v-icon :color="iconText">arrow_back</v-icon>
           </a>
-          <span class="bp-header-title ml-1">Proof Preview</span>
+          <v-btn icon class="ml-1" v-if="proofs.length > 1" :disabled="!canPrevProof" @click="prevProof" aria-label="Previous proof">
+            <v-icon>keyboard_arrow_left</v-icon>
+          </v-btn>
+          <v-btn icon class="ml-1" v-if="proofs.length > 1" :disabled="!canNextProof" @click="nextProof" aria-label="Next proof">
+            <v-icon>keyboard_arrow_right</v-icon>
+          </v-btn>
+          <span class="bp-header-title ml-2">Proof Preview <span v-if="proofs.length > 1" class="bp-dialog-pager-count">({{ dialogProofIndex + 1 }} of {{ proofs.length }})</span></span>
           <v-spacer></v-spacer>
           <v-btn class="bp-btn-coral mr-2" @click="pickProof(dialogProof)">
             Pick This Proof <v-icon right>check</v-icon>
@@ -353,12 +377,15 @@
         <v-card-text class="bp-dialog-body">
           <div class="bp-dialog-inner">
             <div class="bp-dialog-content-card">
-              <div class="bp-divider">
-                <v-icon small color="#00B8D4">auto_awesome</v-icon>
-                <span class="ml-1">Your Customized Proof</span>
-              </div>
+              <div class="bp-proof-title">{{ dialogProof.title }}</div>
               <div class="bp-dialog-proof-wrap">
-                <div v-html="dialogProof.html" class="bp-dialog-proof"></div>
+                <!-- Side 1: existing HTML render (front of the ad) -->
+                <div v-html="dialogProof.html" class="bp-dialog-proof bp-dialog-proof-img"></div>
+                <!-- Side 2: only when the proof has a back-side image -->
+                <img v-if="dialogProof.side2Url"
+                     :src="dialogProof.side2Url"
+                     :alt="(dialogProof.title || 'Spec ad') + ' — side 2'"
+                     class="bp-dialog-proof-img" />
               </div>
             </div>
           </div>

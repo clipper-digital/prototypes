@@ -714,9 +714,10 @@ html {
 
 .bp-dialog-proof-wrap {
   padding: 16px;
-  overflow-x: auto;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
 }
 
 .bp-dialog-proof > div {
@@ -809,14 +810,12 @@ html {
   color: var(--bp-cyan) !important;
 }
 
-/* Dark mode: Use Current button matches input border (muted), hover lifts to white */
+/* Dark mode resting: Use Current button matches input border (muted).
+ * Light mode resting inherits Vuetify outlined defaults so it visually matches
+ * the inputs. Hover (both themes) is handled below with the cyan treatment. */
 .theme--dark.v-application .bp-use-current-btn.v-btn--outlined {
   border-color: var(--bp-border) !important;
   color: var(--bp-muted) !important;
-}
-.theme--dark.v-application .bp-use-current-btn.v-btn--outlined:hover {
-  border-color: white !important;
-  color: white !important;
 }
 
 .bp-link {
@@ -856,6 +855,224 @@ html {
   .bp-proof-card { width: 100%; max-width: 340px; }
   .bp-share-row { flex-direction: column; }
   .bp-share-btn-outline { margin-left: 0 !important; }
+}
+
+/* Ad Types section — pill selector + CCO checkbox */
+.bp-ad-types-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.bp-pill-group {
+  display: inline-flex;
+  gap: 8px;
+}
+.bp-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 84px;
+  padding: 8px 22px;
+  border-radius: 999px;
+  border: 1px solid var(--bp-border);
+  background: var(--bp-input-bg);
+  color: var(--bp-muted);
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.bp-pill:hover {
+  border-color: var(--bp-cyan);
+  color: var(--bp-cyan);
+}
+.bp-pill:focus-visible {
+  outline: 2px solid var(--bp-cyan);
+  outline-offset: 2px;
+}
+.bp-pill--active {
+  border-color: var(--bp-text-soft);
+  color: var(--bp-text);
+}
+.bp-cco-checkbox {
+  margin-top: 0 !important;
+  margin-left: auto !important;
+  padding-top: 0 !important;
+}
+.bp-cco-checkbox .v-label {
+  font-weight: 600;
+  color: var(--bp-muted);
+  letter-spacing: 0.04em;
+}
+
+/* Proofs step: business identity row above the proof cards */
+.bp-proof-business-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 0 auto 16px;
+  text-align: center;
+}
+.bp-proof-business-logo { max-height: 40px; max-width: 100px; object-fit: contain; }
+.bp-proof-business-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--bp-text);
+  letter-spacing: 0.01em;
+}
+
+/* Proof card: title header, actions bar */
+.bp-proof-title {
+  font-family: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 0.7rem;
+  color: var(--bp-faint);
+  letter-spacing: 0.04em;
+  padding: 10px 14px 4px;
+  text-align: center;
+  word-break: break-all;
+}
+.bp-proof-actions-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 8px 12px;
+  background: var(--bp-surface);
+  border-top: 1px solid var(--bp-border);
+  border-bottom: 1px solid var(--bp-border);
+}
+.bp-proof-action-link {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--bp-cyan);
+  text-decoration: none;
+}
+.bp-proof-action-link .v-icon { color: var(--bp-cyan); }
+.bp-proof-action-link:hover { opacity: 0.75; }
+
+/* Dialog header pager count */
+.bp-dialog-pager-count {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--bp-muted);
+  margin-left: 6px;
+}
+
+/* Dialog proof rendering — stack each side full-width like the main app */
+.bp-dialog-proof-img {
+  width: 100%;
+  max-width: 760px;
+  height: auto;
+  display: block;
+  border-radius: 6px;
+  clip-path: inset(7% 6% 7% 6%);
+  -webkit-clip-path: inset(7% 6% 7% 6%);
+}
+.bp-dialog-proof-img img { width: 100%; display: block; border-radius: 6px; }
+
+/* Cyan border/label/icon/caret for Vuetify inputs on hover + focus (both themes) */
+.v-application .v-text-field--outlined:hover:not(.v-input--is-disabled):not(.v-input--is-focused) > .v-input__control > .v-input__slot fieldset {
+  color: var(--bp-cyan) !important;
+}
+.v-application .v-input--is-focused.v-text-field--outlined > .v-input__control > .v-input__slot fieldset {
+  color: var(--bp-cyan) !important;
+}
+.v-application .v-input--is-focused .v-label {
+  color: var(--bp-cyan) !important;
+}
+.v-application .v-input--is-focused .v-input__prepend-inner .v-icon,
+.v-application .v-input--is-focused .v-input__append-inner .v-icon,
+.v-application .v-text-field--outlined:hover:not(.v-input--is-disabled):not(.v-input--is-focused) .v-input__prepend-inner .v-icon,
+.v-application .v-text-field--outlined:hover:not(.v-input--is-disabled):not(.v-input--is-focused) .v-input__append-inner .v-icon {
+  color: var(--bp-cyan) !important;
+}
+.v-application .v-text-field input,
+.v-application .v-textarea textarea {
+  caret-color: var(--bp-cyan);
+}
+.v-application .v-input--checkbox.v-input--is-label-active .v-icon,
+.v-application .v-input--checkbox:hover .v-icon {
+  color: var(--bp-cyan) !important;
+}
+
+/* Use Current button hover — cyan border/text, no background overlay (both themes) */
+.v-application .bp-use-current-btn.v-btn--outlined:hover {
+  border-color: var(--bp-cyan) !important;
+  color: var(--bp-cyan) !important;
+}
+.v-application .bp-use-current-btn.v-btn--outlined:hover::before {
+  opacity: 0 !important;
+}
+
+/* Logo dropzone icon should follow hover color */
+.bp-logo-dropzone:hover .v-icon { color: var(--bp-cyan) !important; }
+
+/*
+ * intro.js tooltip — dark-mode only override. Light mode keeps the bundled style
+ * intact. Scoped via `body.bp-dark` because the tooltip is portaled outside .v-application
+ * (so our --bp-* variables don't cascade — using literal colors instead).
+ */
+/* Widen the tooltip to match the main app's local introjs sizing (CDN caps at 300px). */
+.introjs-tooltip {
+  min-width: 320px !important;
+  max-width: 420px !important;
+}
+body.bp-dark .introjs-tooltip {
+  background-color: #14253F !important;
+  color: #E2E8F0 !important;
+  border: 1px solid #2B4264;
+}
+body.bp-dark .introjs-tooltiptext { color: #E2E8F0; }
+body.bp-dark .introjs-helperNumberLayer { color: #94A3B8; }
+body.bp-dark .introjs-tooltipbuttons { border-top: 1px solid #2B4264; }
+body.bp-dark .introjs-button {
+  background-color: #1B2E4D !important;
+  border-color: #2B4264 !important;
+  color: #CBD5E1 !important;
+  text-shadow: none !important;
+}
+body.bp-dark .introjs-skipbutton { color: #94A3B8 !important; }
+body.bp-dark .introjs-skipbutton:hover { color: #FFFFFF !important; }
+body.bp-dark .introjs-arrow.top,
+body.bp-dark .introjs-arrow.top-right,
+body.bp-dark .introjs-arrow.top-middle { border-bottom-color: #14253F !important; }
+body.bp-dark .introjs-arrow.bottom,
+body.bp-dark .introjs-arrow.bottom-right,
+body.bp-dark .introjs-arrow.bottom-middle { border-top-color: #14253F !important; }
+body.bp-dark .introjs-arrow.left,
+body.bp-dark .introjs-arrow.left-bottom { border-right-color: #14253F !important; }
+body.bp-dark .introjs-arrow.right,
+body.bp-dark .introjs-arrow.right-bottom { border-left-color: #14253F !important; }
+
+/* intro.js next/back/skip buttons — same dark-navy bg + cyan outline + white text
+ * in both themes. `:not(.introjs-disabled)` skips the disabled variant. */
+.introjs-button:not(.introjs-disabled):hover,
+.introjs-button:not(.introjs-disabled):focus,
+.introjs-button:not(.introjs-disabled):active {
+  background-color: #2B4264 !important;
+  border-color: var(--bp-cyan) !important;
+  color: #FFFFFF !important;
+  text-shadow: none !important;
+  box-shadow: 0 0 0 .2rem rgba(0,184,212,0.25) !important;
+}
+.introjs-button.introjs-disabled,
+.introjs-button.introjs-disabled:hover,
+.introjs-button.introjs-disabled:focus {
+  cursor: not-allowed !important;
+  opacity: 0.55;
+  box-shadow: none !important;
+}
+body.bp-dark .introjs-button.introjs-disabled,
+body.bp-dark .introjs-button.introjs-disabled:hover {
+  background-color: #1B2E4D !important;
+  border-color: #2B4264 !important;
+  color: #64748B !important;
 }
 
 /* Print template (hidden on screen, shown only when printing) */

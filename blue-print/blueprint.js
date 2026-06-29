@@ -17,7 +17,7 @@ var vm = new Vue({
     geoTimer: null,
     detailsUnlocked: false,
     step: 'form',
-    form: { businessName: '', address: '', phone: '', website: '', offer: '', hours: '', category: '' },
+    form: { businessName: '', address: '', phone: '', website: '', hours: '', category: '', productLine: 'VALPAK', cco: false },
     query: '',
     selectedPlace: null,
     suggestions: [],
@@ -46,6 +46,9 @@ var vm = new Vue({
     linkCopied: false
   }),
   mounted() {
+    // Mirror Vuetify's dark-mode flag onto <body> so styles can reach DOM that
+    // intro.js (and other libraries) append outside the .v-application root.
+    document.body.classList.toggle('bp-dark', this.$vuetify.theme.dark)
     // Prototype: location is pre-populated; skip the auto-geolocation prompt on page load.
     // The "Use Current Location" button still works for users who want to grant permission.
     const saved = JSON.parse(localStorage.getItem('bp_rep_profile') || '{}')
@@ -67,24 +70,12 @@ var vm = new Vue({
     readyForDetails() {
       return this.locationSet && !!this.form.businessName
     },
-    offerRules() {
-      return [
-        v => !v || /^(0[1-9]|1[0-2])\/(0[1-9]|[12]\d|3[01])\/\d{4}$/.test(v) || 'Use mm/dd/yyyy format',
-        v => {
-          if (!v || !/^\d{2}\/\d{2}\/\d{4}$/.test(v)) return true
-          const [m, d, y] = v.split('/').map(Number)
-          const date = new Date(y, m - 1, d)
-          if (date.getFullYear() !== y || date.getMonth() !== m - 1 || date.getDate() !== d) return 'Not a real date'
-          const tomorrow = new Date()
-          tomorrow.setHours(0, 0, 0, 0)
-          tomorrow.setDate(tomorrow.getDate() + 1)
-          return date >= tomorrow || 'Expiration must be at least one day in the future'
-        }
-      ]
+    dialogProofIndex() {
+      if (!this.dialogProof) return -1
+      return this.proofs.findIndex(p => p === this.dialogProof)
     },
-    offerValid() {
-      return this.offerRules.every(rule => rule(this.form.offer) === true)
-    },
+    canPrevProof() { return this.dialogProofIndex > 0 },
+    canNextProof() { return this.dialogProofIndex >= 0 && this.dialogProofIndex < this.proofs.length - 1 },
     repName() {
       if (!this.authUser) return ''
       if (this.authUser.fullName) return this.authUser.fullName
@@ -100,20 +91,13 @@ var vm = new Vue({
       const h = new Date().getHours()
       return h < 12 ? 'wb_twilight' : h < 18 ? 'wb_sunny' : 'bedtime'
     },
-    mailto() {
-      const name = this.form.businessName
-      const proof = this.selected
-      const repName = this.repName
-      const sub = encodeURIComponent(`Spec Art Proof for ${name}`)
-      const body = encodeURIComponent(
-        `Hi,\n\nI put together a personalized Valpak Clipp ad proof for ${name}. Take a look and let me know what you think!\n\n` +
-        (proof ? `Headline: ${proof.headline}\nOffer: ${proof.offerText}\n\n` : '') +
-        `Ready to get started? Reply to this email or give me a call.\n\n${repName}`
-      )
-      return `mailto:?subject=${sub}&body=${body}`
-    }
   },
   watch: {
+    step(newStep, oldStep) {
+      if (newStep !== oldStep) {
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      }
+    },
     readyForDetails(val) {
       if (val) this.detailsUnlocked = true
     },
@@ -121,7 +105,7 @@ var vm = new Vue({
       if (oldVal && val !== oldVal) {
         this.selectedPlace = null
         this.query = ''
-        Object.assign(this.form, { businessName: '', address: '', phone: '', website: '', offer: '', hours: '', category: '' })
+        Object.assign(this.form, { businessName: '', address: '', phone: '', website: '', hours: '', category: '', productLine: 'VALPAK', cco: false })
       }
     },
     locationQuery(val) {
@@ -149,6 +133,7 @@ var vm = new Vue({
   methods: {
     toggleTheme() {
       this.$vuetify.theme.dark = !this.$vuetify.theme.dark
+      document.body.classList.toggle('bp-dark', this.$vuetify.theme.dark)
       localStorage.setItem('bp_theme', this.$vuetify.theme.dark ? 'dark' : 'light')
     },
     autocomplete(val) {
@@ -409,9 +394,10 @@ var vm = new Vue({
         address: this.form.address,
         phone: this.form.phone,
         website: this.form.website,
-        offer: this.form.offer,
         hours: this.form.hours,
         category: this.form.category || this.searchTerm || 'General',
+        productLine: this.form.productLine,
+        cco: this.form.cco,
         templateUrls: templateUrls.filter(u => u)
       }
       axios.post('/blue-print/api/generate', payload)
@@ -429,9 +415,13 @@ var vm = new Vue({
             window.scrollTo({ top: 0, behavior: 'smooth' })
             return
           }
-          this.proofs = proofs.map((p, i) => ({ ...p, templateUrl: templateUrls[i] || '' }))
+          this.proofs = proofs.map((p, i) => ({
+            ...p,
+            templateUrl: templateUrls[i] || '',
+            title: p.title || `Group1Ad${i + 1}-${(p.headline || '').toLowerCase().replace(/[^a-z0-9]+/g, '').slice(0, 12) || 'mockproof'}`,
+            activeSideIndex: 0
+          }))
           this.step = 'proofs'
-          window.scrollTo({ top: 0, behavior: 'smooth' })
         })
         .catch(() => {
           this.step = 'form'
@@ -442,6 +432,16 @@ var vm = new Vue({
     openDialog(proof) {
       this.dialogProof = proof
       this.dialogOpen = true
+    },
+    flipProofSide(proof) {
+      if (!proof || !proof.side2Url) return
+      proof.activeSideIndex = (proof.activeSideIndex || 0) === 0 ? 1 : 0
+    },
+    prevProof() {
+      if (this.canPrevProof) this.dialogProof = this.proofs[this.dialogProofIndex - 1]
+    },
+    nextProof() {
+      if (this.canNextProof) this.dialogProof = this.proofs[this.dialogProofIndex + 1]
     },
     pickProof(proof) {
       this.dialogOpen = false
@@ -459,7 +459,7 @@ var vm = new Vue({
     },
     reset() {
       this.step = 'form'
-      this.form = { businessName: '', address: '', phone: '', website: '', offer: '', hours: '', category: '' }
+      this.form = { businessName: '', address: '', phone: '', website: '', hours: '', category: '', productLine: 'VALPAK', cco: false }
       this.query = ''
       this.searchTerm = ''
       this.selectedPlace = null
@@ -583,45 +583,115 @@ var vm = new Vue({
       this.$refs.logoInput.value = ''
     },
     tour() {
-      if (this.step !== 'form') return
-      introJs().setOptions({
-        steps: [
-          {
-            title: '✨ Welcome to BluePrint',
-            intro: '<p>BluePrint constructs customized print ad mockups on the fly. This tour walks you through the 3-step process.</p>'
-          },
-          {
-            title: 'Step 1 — Your Location',
-            intro: '<p>Enter your location or tap <strong>Use Current Location</strong> to auto-detect it. This biases the business search toward your area.</p>',
-            element: document.getElementById('bpLocationCard')
-          },
-          {
-            title: 'Find the Business',
-            intro: "<p>Search for your client's Google Business listing. Contact details auto-fill from Google Places.</p>",
-            element: document.getElementById('bpBusinessSearch')
-          },
-          {
-            title: 'Review Contact Details',
-            intro: '<p>Confirm or adjust the pre-filled address, phone, and website. These appear on the proof.</p>',
-            element: document.getElementById('bpContactFields')
-          },
-          {
-            title: 'Upload a Logo (optional)',
-            intro: "<p>Drag and drop or click to upload the client's logo. It appears on the proof and in the email.</p>",
-            element: document.getElementById('bpLogoUpload')
-          },
-          {
-            title: "Offer Expiration Date",
-            intro: '<p>Enter the offer expiration date. This appears in the fine print and offer callout on the proof.</p>',
-            element: document.getElementById('bpOfferField')
-          },
-          {
-            title: 'Generate Your Proofs',
-            intro: "<p>Click to let BluePrint find matching templates and write personalized copy. You'll get two proof options to choose from.</p>",
-            element: document.getElementById('bpGenerateBtn')
-          }
-        ]
-      }).start()
+      // Unlock the second card BEFORE $nextTick so Vue mounts it. The steps must
+      // be BUILT INSIDE $nextTick — building them upfront calls getElementById()
+      // before the card is in the DOM, which leaves every step after "Find the
+      // Business" without an element to spotlight.
+      if (this.step === 'form') this.detailsUnlocked = true
+      this.$nextTick(() => {
+        let steps = []
+        if (this.step === 'form') steps = this.formTourSteps()
+        else if (this.step === 'proofs') steps = this.proofsTourSteps()
+        else if (this.step === 'selected') steps = this.selectedTourSteps()
+        if (!steps.length) return
+        introJs().setOptions({ steps }).start()
+      })
+    },
+    formTourSteps() {
+      return [
+        {
+          title: '✨ Welcome to BluePrint',
+          intro: '<p>BluePrint constructs customized print ad specs on the fly. This tour walks you through the 3-step process.</p>'
+        },
+        {
+          title: 'Step 1 — Your Location',
+          intro: '<p>Enter your location or tap <strong>Use Current</strong> to auto-detect it. This biases the business search toward your area in a 30 mile radius.</p>',
+          element: document.getElementById('bpLocationCard')
+        },
+        {
+          title: 'Find the Business',
+          intro: "<p>Search for your client's Google Business listing. Contact details auto-fill from Google Places.</p>",
+          element: document.getElementById('bpBusinessSearch')
+        },
+        {
+          title: 'Review Contact Details',
+          intro: '<p>Confirm or adjust the pre-filled address, phone, and website. These appear on your ad.</p>',
+          element: document.getElementById('bpContactFields')
+        },
+        {
+          title: 'Upload a Logo (optional)',
+          intro: "<p>Drag and drop or click to upload the client's logo. It appears on your ad and when sharing.</p>",
+          element: document.getElementById('bpLogoUpload')
+        },
+        {
+          title: 'Choose the Ad Types',
+          intro: '<p>Pick the product brand. Toggle CCO if the ad needs a QR Code.</p>',
+          element: document.getElementById('bpAdTypes')
+        },
+        {
+          title: 'Generate Your Ads',
+          intro: "<p>Click to let BluePrint find matching templates and write personalized copy. You'll get several ad options to choose from.</p>",
+          element: document.getElementById('bpGenerateBtn')
+        }
+      ]
+    },
+    proofsTourSteps() {
+      const firstCard = document.querySelector('.bp-proof-card')
+      const firstActions = document.querySelector('.bp-proof-card .bp-proof-actions-bar')
+      const firstPick = document.querySelector('.bp-proof-card .bp-btn-coral')
+      const tryAgain = document.querySelector('.bp-link')
+      return [
+        {
+          title: 'Your Ads Are Ready',
+          intro: '<p>BluePrint generated several customized ad specs for this business. Browse the options below, then pick the one that feels right.</p>'
+        },
+        firstCard && {
+          title: 'Ad Card',
+          intro: '<p>Each card shows the reference number at the top and a preview of the ad spec. Click anywhere on the card to enlarge it.</p>',
+          element: firstCard
+        },
+        firstActions && {
+          title: 'Enlarge or Flip',
+          intro: '<p><strong>Enlarge</strong> opens a full-screen preview with prev/next paging. <strong>Flip</strong> toggles between the front and back of the ad when both sides are available.</p>',
+          element: firstActions
+        },
+        firstPick && {
+          title: 'Pick an Ad',
+          intro: '<p>When the rep is ready to commit, picking an ad saves it and advances to the share screen.</p>',
+          element: firstPick
+        },
+        tryAgain && {
+          title: 'Adjust and Retry',
+          intro: "<p>Not finding the right look? Jump back to the beginning to tweak the business info or product brand, then regenerate.</p>",
+          element: tryAgain
+        }
+      ].filter(Boolean)
+    },
+    selectedTourSteps() {
+      const card = document.querySelector('.bp-selected-card')
+      const shareRow = document.querySelector('.bp-share-row')
+      const startOver = document.querySelector('.bp-selected-step .bp-link')
+      return [
+        {
+          title: 'Great Pick!',
+          intro: '<p>The selected ad is shown here, ready to share with the client.</p>'
+        },
+        card && {
+          title: 'Selected Ad',
+          intro: '<p>A clean preview of the chosen ad. Both sides are included when the ad spec is double-sided.</p>',
+          element: card
+        },
+        shareRow && {
+          title: 'Share Options',
+          intro: '<p><strong>Email to Client</strong> sends a formatted proof with ad images inlined. <strong>Copy Link</strong> creates a 30-day shareable URL. <strong>Print</strong> opens a print-ready layout.</p>',
+          element: shareRow
+        },
+        startOver && {
+          title: 'Start Over',
+          intro: "<p>Reset the form and run BluePrint for a different business.</p>",
+          element: startOver
+        }
+      ].filter(Boolean)
     },
     print() {
       window.print()

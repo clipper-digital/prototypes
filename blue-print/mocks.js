@@ -139,9 +139,14 @@
       ]
       return delay(2200, () => ({
         data: {
-          proofs: templateUrls.slice(0, 2).map(u => ({
+          proofs: templateUrls.slice(0, 2).map((u, i) => ({
             templateUrl: u,
             html: `<img src="${u}" alt="Sample ad" style="width:100%;display:block;" />`,
+            // Demo: both proofs get a real back-side image so the Flip action and
+            // multi-side dialog rendering have something to show.
+            side2Url: i === 0
+              ? 'https://www.insidevalpak.com/MyAdCenterContent/AdOrderPreview/3261121351_side2.jpg'
+              : 'https://www.insidevalpak.com/MyAdCenterContent/AdOrderPreview/3261114612_side2.jpg',
             headline: '',
             subheadline: '',
             offerText: '',
